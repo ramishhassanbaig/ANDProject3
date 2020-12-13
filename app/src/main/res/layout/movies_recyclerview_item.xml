@@ -2,7 +2,6 @@
 <androidx.constraintlayout.widget.ConstraintLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:layout_margin="10dp"
     android:layout_width="match_parent"
     android:layout_height="200dp">
 
@@ -17,6 +16,7 @@
         android:id="@+id/title_tv"
         android:layout_width="match_parent"
         android:layout_height="40dp"
+        android:visibility="gone"
         android:text="movie title"
         android:textSize="16sp"
         android:singleLine="true"
