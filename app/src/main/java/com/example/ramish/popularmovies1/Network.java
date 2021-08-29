@@ -7,17 +7,20 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.BufferedReader;
-import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.OutputStream;
-import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.Collection;
+import java.util.Date;
 import java.util.List;
+
+import androidx.appcompat.view.menu.MenuBuilder;
 
 public class Network {
 
@@ -26,9 +29,13 @@ public class Network {
     public static String API_KEY = "MY_API_KEY";
     public static String POPULAR_MOVIES = "popular";
     public static String TOP_RATED_MOVIES = "top_rated";
+    public static String TRAILERS = "/videos";
+    public static String REVIEWS = "/reviews";
 
     private String jsonString = "";
-    private List<Movie> movieList;
+    private ArrayList<Movie> movieList;
+    private ArrayList<MovieTrailer> movieTrailersList;
+    private ArrayList<MovieReview> movieReviewsList;
     private NetworkListener listener;
 
     public void setListener(NetworkListener listener) {
@@ -47,26 +54,55 @@ public class Network {
         return (BASE_URL + TOP_RATED_MOVIES + "?api_key=" + API_KEY);
     }
 
+    private String getMovieTrailerUrl(String id){
+        return  (BASE_URL + id + TRAILERS + "?api_key=" + API_KEY);
+    }
+
+    private String getMovieReviewsUrl(String id){
+        return  (BASE_URL + id + REVIEWS + "?api_key=" + API_KEY);
+    }
+
     public class ServiceTask extends AsyncTask<String, Void, String>{
 
+        String networkUrl = "";
         @Override
         protected String doInBackground(String... strings) {
-            return callService(strings[0]);
+            networkUrl = strings[0];
+            return callService(networkUrl);
         }
 
         @Override
         protected void onPostExecute(String s) {
             jsonString = s;
             movieList = new ArrayList<>();
+            movieTrailersList = new ArrayList<>();
+            movieReviewsList = new ArrayList<>();
             try {
                 JSONObject jsonObject = new JSONObject(jsonString);
                 JSONArray results = jsonObject.getJSONArray("results");
                 for (int i = 0; i < results.length(); i++) {
                     JSONObject movieJson = (JSONObject) results.get(i);
-                    movieList.add(parseJSONToMovie(movieJson));
+                    if (networkUrl.contains(TRAILERS)){
+                        movieTrailersList.add(parseJSONToMovieTrailer(movieJson));
+                    }
+                    else if (networkUrl.contains(REVIEWS)){
+                        movieReviewsList.add(parseJSONToMovieReview(movieJson));
+                    }
+                    else {
+                        movieList.add(parseJSONToMovie(movieJson));
+                    }
                 }
 
-                listener.onSuccess((ArrayList<Movie>) movieList);
+                if (networkUrl.contains(TRAILERS)){
+                    listener.onSuccess(movieTrailersList);
+                }
+                else if (networkUrl.contains(REVIEWS)){
+                    listener.onSuccess(movieReviewsList);
+                }
+                else {
+                    listener.onSuccess(movieList);
+                }
+
             }
             catch (JSONException e){
                 e.printStackTrace();
@@ -119,10 +155,21 @@ public class Network {
         return movieList;
     }
 
+    public List<MovieTrailer> getMovieTrailersList(String id){
+        new ServiceTask().execute(getMovieTrailerUrl(id));
+        return movieTrailersList;
+    }
+
+    public List<MovieTrailer> getMovieReviewsList(String id){
+        new ServiceTask().execute(getMovieReviewsUrl(id));
+        return movieTrailersList;
+    }
+
     private Movie parseJSONToMovie(JSONObject movieJson) {
         Movie movie = new Movie();
         try {
             movie.setTitle(movieJson.getString("title"));
+            movie.setId(movieJson.getInt("id"));
             movie.setOriginalTitle(movieJson.getString("original_title"));
             movie.setPopularity(movieJson.getDouble("popularity"));
             movie.setVoteCount(movieJson.getInt("vote_count"));
@@ -138,6 +185,44 @@ public class Network {
         return movie;
     }
 
+    private MovieTrailer parseJSONToMovieTrailer(JSONObject movieTrailerJson) {
+        MovieTrailer movieTrailer = new MovieTrailer();
+        try {
+            movieTrailer.setId(movieTrailerJson.getString("id"));
+            movieTrailer.setName(movieTrailerJson.getString("name"));
+            movieTrailer.setSite(movieTrailerJson.getString("site"));
+            movieTrailer.setKey(movieTrailerJson.getString("key"));
+        }
+        catch (JSONException e){
+            e.printStackTrace();
+        }
+        return movieTrailer;
+    }
+
+    private MovieReview parseJSONToMovieReview(JSONObject movieReivewJson) {
+        MovieReview movieReview = new MovieReview();
+        try {
+            movieReview.setId(movieReivewJson.getString("id"));
+            movieReview.setAuthor(movieReivewJson.getString("author"));
+
+            AuthorDetails authorDetails = new AuthorDetails();
+            JSONObject authorJson = movieReivewJson.getJSONObject("author_details");
+            authorDetails.setUsername(authorJson.getString("username"));
+            authorDetails.setRating(authorJson.getInt("rating"));
+
+            movieReview.setAuthor_details(authorDetails);
+            movieReview.setContent(movieReivewJson.getString("content"));
+
+//            String dateStr = movieReivewJson.getString("created_at").split("T")[0];
+            movieReview.setCreated_at(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS").parse(movieReivewJson.getString("created_at").replace("T"," ")));
+
+        }
+        catch (JSONException | ParseException e){
+            e.printStackTrace();
+        }
+        return movieReview;
+    }
+
 
     private String convertInputStreamToString(InputStream inputStream) throws IOException {
         BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
@@ -151,7 +236,7 @@ public class Network {
     }
 
     public interface NetworkListener{
-        void onSuccess(ArrayList<Movie> movies);
+        void onSuccess(ArrayList<?> list);
     }
 
 }

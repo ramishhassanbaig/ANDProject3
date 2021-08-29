@@ -2,7 +2,6 @@ package com.example.ramish.popularmovies1;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.view.menu.MenuBuilder;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -10,9 +9,11 @@ import androidx.recyclerview.widget.RecyclerView;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.MenuItem;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class MainActivity extends AppCompatActivity implements MovieAdapter.ItemSelectedListener, PagesAdapter.PageSelectedListener {
 
@@ -20,6 +21,7 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.Item
     MovieAdapter movieAdapter;
     PagesAdapter pagesAdapter;
     Network network;
+    private boolean isPopular = true;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -38,8 +40,8 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.Item
 
         network.setListener(new Network.NetworkListener() {
             @Override
-            public void onSuccess(ArrayList<Movie> movies) {
-                movieAdapter = new MovieAdapter(MainActivity.this, movies);
+            public void onSuccess(ArrayList<?> movies) {
+                movieAdapter = new MovieAdapter(MainActivity.this, (ArrayList<Movie>) movies);
                 movieAdapter.setItemSelectedListener(MainActivity.this);
                 recyclerView.setAdapter(movieAdapter);
 
@@ -58,7 +60,23 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.Item
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.sort_menu,menu);
+        MenuInflater menuInflater = getMenuInflater();
+        menuInflater.inflate(R.menu.sort_menu,menu);
+
+        try {
+            MenuItem itemPopular = menu.findItem(R.id.popularity);
+            MenuItem itemTopRated = menu.findItem(R.id.top_rated);
+            if (isPopular) {
+                itemPopular.setVisible(false);
+                itemTopRated.setVisible(true);
+            } else {
+                itemPopular.setVisible(true);
+                itemTopRated.setVisible(false);
+            }
+        }
+        catch (NullPointerException e){
+            e.printStackTrace();
+        }
 
         return true;
     }
@@ -73,12 +91,14 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.Item
         switch (item.getItemId()){
             case R.id.popularity:
                 network.getPopularMoviesList();
-
+                isPopular = true;
                 break;
             case R.id.top_rated:
                 network.getTopRatedMoviesList();
+                isPopular = false;
                 break;
         }
+        invalidateOptionsMenu();
         return true;
     }
 
