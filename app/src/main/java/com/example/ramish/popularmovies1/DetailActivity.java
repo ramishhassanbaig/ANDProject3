@@ -3,7 +3,7 @@ package com.example.ramish.popularmovies1;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.recyclerview.widget.GridLayoutManager;
+import androidx.lifecycle.Observer;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -14,10 +14,10 @@ import android.os.Bundle;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
-import android.widget.TableLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.example.ramish.popularmovies1.data.MovieRepository;
 import com.google.android.material.tabs.TabLayout;
 
 import java.net.MalformedURLException;
@@ -26,7 +26,7 @@ import java.util.ArrayList;
 
 public class DetailActivity extends AppCompatActivity implements Network.NetworkListener, TrailerAdapter.TrailerSelectedListener, ReviewAdapter.TrailerSelectedListener {
 
-    ImageView poster;
+    ImageView poster, favorite;
     TextView title,releaseDate, rating, description,no_content_found;
     RecyclerView listRecyclerView;
     TabLayout tabLayout;
@@ -36,6 +36,7 @@ public class DetailActivity extends AppCompatActivity implements Network.Network
     private TrailerAdapter trailerAdapter;
     private TabLayout.Tab trailerTab, reviewTab;
     private ReviewAdapter reviewAdapter;
+    private boolean isMovieMarkedAsFavorite;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -49,6 +50,7 @@ public class DetailActivity extends AppCompatActivity implements Network.Network
 
         poster = findViewById(R.id.poster_img);
         title = findViewById(R.id.title_tv);
+        favorite = findViewById(R.id.favorite);
         releaseDate = findViewById(R.id.release_date);
         rating = findViewById(R.id.rating);
         description = findViewById(R.id.decription);
@@ -101,6 +103,34 @@ public class DetailActivity extends AppCompatActivity implements Network.Network
         catch (NullPointerException e){
             e.printStackTrace();
         }
+
+        final MovieRepository movieRepository = new MovieRepository(getApplication());
+
+        movieRepository.getMovie(movie).observe(DetailActivity.this, new Observer<Movie>() {
+            @Override
+            public void onChanged(Movie savedMovie) {
+                if(savedMovie!=null && savedMovie.getId().equals(movie.getId())){
+                    isMovieMarkedAsFavorite = true;
+                    favorite.setImageResource(R.drawable.star_sel);
+                }
+                else {
+                    isMovieMarkedAsFavorite = false;
+                    favorite.setImageResource(R.drawable.star_unsel);
+                }
+            }
+        });
+
+        favorite.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+                if (isMovieMarkedAsFavorite)
+                    movieRepository.deleteFavoriteMovie(movie);
+                else
+                    movieRepository.insertFavoriteMovie(movie);
+            }
+        });
+
     }
 
     @Override

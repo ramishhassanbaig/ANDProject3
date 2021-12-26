@@ -11,6 +11,11 @@
             android:id="@+id/top_rated"
             android:title="Top Rated"
             app:showAsAction="collapseActionView" />
+
+        <item
+            android:id="@+id/favorite"
+            android:title="Favorite"
+            app:showAsAction="collapseActionView" />
     </group>
 
 </menu>

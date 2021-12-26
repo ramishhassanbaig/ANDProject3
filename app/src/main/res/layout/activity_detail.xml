@@ -49,6 +49,16 @@
             app:layout_constraintStart_toStartOf="@+id/left_guide"
             app:layout_constraintTop_toBottomOf="@+id/poster_img" />
 
+        <ImageView
+            android:id="@+id/favorite"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            app:layout_constraintEnd_toStartOf="@+id/right_guide"
+            app:layout_constraintHorizontal_bias="0.9"
+            app:layout_constraintStart_toEndOf="@+id/title_tv"
+            app:layout_constraintTop_toTopOf="@+id/title_tv"
+            app:srcCompat="@drawable/star_unsel" />
+
         <TextView
             android:id="@+id/release_date"
             android:layout_width="wrap_content"

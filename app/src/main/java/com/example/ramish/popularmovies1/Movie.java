@@ -3,21 +3,36 @@ package com.example.ramish.popularmovies1;
 import java.io.Serializable;
 import java.util.List;
 
+import androidx.annotation.NonNull;
+import androidx.room.ColumnInfo;
+import androidx.room.Entity;
+import androidx.room.PrimaryKey;
+
+@Entity(tableName = "movie_table")
 public class Movie implements Serializable {
 
+    @ColumnInfo(name = "popularity")
     private Double popularity;
     private Integer voteCount;
     private Boolean video;
+    @ColumnInfo(name = "poster")
     private String posterPath;
+    @PrimaryKey
+    @NonNull
+    @ColumnInfo(name = "id")
     private Integer id;
     private Boolean adult;
     private String backdropPath;
     private String originalLanguage;
+    @ColumnInfo(name = "orig_title")
     private String originalTitle;
-    private List<Integer> genreIds = null;
+//    private List<Integer> genreIds = null;
+    @ColumnInfo(name = "title")
     private String title;
     private Double voteAverage;
+    @ColumnInfo(name = "description")
     private String overview;
+    @ColumnInfo(name = "release_date")
     private String releaseDate;
 
     public Double getPopularity() {
@@ -92,13 +107,13 @@ public class Movie implements Serializable {
         this.originalTitle = originalTitle;
     }
 
-    public List<Integer> getGenreIds() {
-        return genreIds;
-    }
+//    public List<Integer> getGenreIds() {
+//        return genreIds;
+//    }
 
-    public void setGenreIds(List<Integer> genreIds) {
-        this.genreIds = genreIds;
-    }
+//    public void setGenreIds(List<Integer> genreIds) {
+//        this.genreIds = genreIds;
+//    }
 
     public String getTitle() {
         return title;

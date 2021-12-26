@@ -35,6 +35,13 @@ dependencies {
     annotationProcessor 'com.github.bumptech.glide:compiler:4.11.0'
 //    implementation 'com.github.bumptech.glide:okhttp3-integration:4.11.0'
 
+    implementation "androidx.room:room-runtime:2.3.0"
+    annotationProcessor "androidx.room:room-compiler:2.3.0"
+
+    implementation "androidx.lifecycle:lifecycle-livedata:2.3.1"
+    implementation "androidx.lifecycle:lifecycle-common-java8:2.3.1"
+
+
 //    implementation ("com.github.bumptech.glide:glide:4.9.0") {
 //        exclude group: "com.android.support"
 //    }

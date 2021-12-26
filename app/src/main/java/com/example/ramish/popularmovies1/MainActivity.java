@@ -2,6 +2,8 @@ package com.example.ramish.popularmovies1;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.lifecycle.LiveData;
+import androidx.lifecycle.Observer;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -11,6 +13,8 @@ import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+
+import com.example.ramish.popularmovies1.data.MovieRepository;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -22,6 +26,7 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.Item
     PagesAdapter pagesAdapter;
     Network network;
     private boolean isPopular = true;
+    private boolean isFavorite = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -54,8 +59,6 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.Item
 
 
 
-
-
     }
 
     @Override
@@ -66,12 +69,21 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.Item
         try {
             MenuItem itemPopular = menu.findItem(R.id.popularity);
             MenuItem itemTopRated = menu.findItem(R.id.top_rated);
+            MenuItem itemFavorite = menu.findItem(R.id.favorite);
             if (isPopular) {
                 itemPopular.setVisible(false);
                 itemTopRated.setVisible(true);
-            } else {
+                itemFavorite.setVisible(true);
+            }
+            else if (isFavorite){
+                itemPopular.setVisible(true);
+                itemTopRated.setVisible(true);
+                itemFavorite.setVisible(false);
+            }
+            else {
                 itemPopular.setVisible(true);
                 itemTopRated.setVisible(false);
+                itemFavorite.setVisible(true);
             }
         }
         catch (NullPointerException e){
@@ -92,10 +104,17 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.Item
             case R.id.popularity:
                 network.getPopularMoviesList();
                 isPopular = true;
+                isFavorite = false;
                 break;
             case R.id.top_rated:
                 network.getTopRatedMoviesList();
                 isPopular = false;
+                isFavorite = false;
+                break;
+            case R.id.favorite:
+                getFavoriteMoviesList();
+                isPopular = false;
+                isFavorite = true;
                 break;
         }
         invalidateOptionsMenu();
@@ -112,5 +131,43 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.Item
     @Override
     public void onPageClicked(Integer page) {
 
+    }
+
+    private ArrayList<Movie> getFavoriteMoviesList(){
+
+        try {
+            LiveData<List<Movie>> savedMovies;
+            final ArrayList<Movie> favoriteMovies = new ArrayList<>();
+            MovieRepository movieRepository = new MovieRepository(getApplication());
+            savedMovies = movieRepository.getMoviesList();
+
+//            favoriteMovies = new ArrayList<>(savedMovies.getValue());
+//            favoriteMovies = new ArrayList<>(savedMovies);
+
+            savedMovies.observe(MainActivity.this, new Observer<List<Movie>>() {
+                @Override
+                public void onChanged(List<Movie> savedMovies) {
+                    if (isFavorite) {
+                        favoriteMovies.clear();
+                        favoriteMovies.addAll(savedMovies);
+                        movieAdapter = new MovieAdapter(MainActivity.this, favoriteMovies);
+                        movieAdapter.setItemSelectedListener(MainActivity.this);
+                        recyclerView.setAdapter(movieAdapter);
+
+                        pagesAdapter = new PagesAdapter(MainActivity.this);
+                        pagesAdapter.setPageSelectedListener(MainActivity.this);
+                        pagesRecyclerView.setAdapter(pagesAdapter);
+                    }
+                }
+            });
+
+
+
+        return favoriteMovies;
+        }
+        catch (Exception e){
+            e.printStackTrace();
+            return null;
+        }
     }
 }
