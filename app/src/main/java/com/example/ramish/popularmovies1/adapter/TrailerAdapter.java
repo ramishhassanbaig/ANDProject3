@@ -1,4 +1,4 @@
-package com.example.ramish.popularmovies1;
+package com.example.ramish.popularmovies1.adapter;
 
 import android.content.Context;
 import android.view.LayoutInflater;
@@ -6,7 +6,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -15,6 +14,10 @@ import java.util.ArrayList;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.RecyclerView;
+
+import com.example.ramish.popularmovies1.GlideApp;
+import com.example.ramish.popularmovies1.model.MovieTrailer;
+import com.example.ramish.popularmovies1.R;
 
 public class TrailerAdapter extends RecyclerView.Adapter<TrailerAdapter.ViewHolder> {
 

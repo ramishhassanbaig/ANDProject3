@@ -2,9 +2,8 @@ package com.example.ramish.popularmovies1.data;
 
 import android.app.Application;
 
-import com.example.ramish.popularmovies1.Movie;
+import com.example.ramish.popularmovies1.model.Movie;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import androidx.lifecycle.LiveData;

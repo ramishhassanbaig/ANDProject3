@@ -1,4 +1,4 @@
-package com.example.ramish.popularmovies1;
+package com.example.ramish.popularmovies1.model;
 
 import java.util.Date;
 

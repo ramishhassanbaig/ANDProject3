@@ -1,4 +1,4 @@
-package com.example.ramish.popularmovies1;
+package com.example.ramish.popularmovies1.ui;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
@@ -14,6 +14,11 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 
+import com.example.ramish.popularmovies1.model.Movie;
+import com.example.ramish.popularmovies1.adapter.MovieAdapter;
+import com.example.ramish.popularmovies1.Network;
+import com.example.ramish.popularmovies1.adapter.PagesAdapter;
+import com.example.ramish.popularmovies1.R;
 import com.example.ramish.popularmovies1.data.MovieRepository;
 
 import java.util.ArrayList;
@@ -21,17 +26,31 @@ import java.util.List;
 
 public class MainActivity extends AppCompatActivity implements MovieAdapter.ItemSelectedListener, PagesAdapter.PageSelectedListener {
 
+    private static final String LOCAL_MOVIES_LIST = "moviesList";
     RecyclerView recyclerView, pagesRecyclerView;
     MovieAdapter movieAdapter;
     PagesAdapter pagesAdapter;
     Network network;
     private boolean isPopular = true;
     private boolean isFavorite = false;
+    ArrayList<Movie> localMoviesList;
+
+
+    @Override
+    protected void onSaveInstanceState(@NonNull Bundle outState) {
+        super.onSaveInstanceState(outState);
+        if (localMoviesList!=null && localMoviesList.size()>0){
+            outState.putSerializable(LOCAL_MOVIES_LIST,localMoviesList);
+        }
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        if (savedInstanceState!=null){
+            localMoviesList = (ArrayList<Movie>) savedInstanceState.getSerializable(LOCAL_MOVIES_LIST);
+        }
 
         recyclerView = findViewById(R.id.recyclerview);
         pagesRecyclerView = findViewById(R.id.pages);
@@ -41,20 +60,34 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.Item
         pagesRecyclerView.setLayoutManager(new LinearLayoutManager(MainActivity.this,LinearLayoutManager.HORIZONTAL,false));
 
         recyclerView.setLayoutManager(new GridLayoutManager(this,3, LinearLayoutManager.VERTICAL,false));
-        network.getPopularMoviesList();
 
-        network.setListener(new Network.NetworkListener() {
-            @Override
-            public void onSuccess(ArrayList<?> movies) {
-                movieAdapter = new MovieAdapter(MainActivity.this, (ArrayList<Movie>) movies);
-                movieAdapter.setItemSelectedListener(MainActivity.this);
-                recyclerView.setAdapter(movieAdapter);
+        if (localMoviesList!=null && localMoviesList.size()>0){
+            movieAdapter = new MovieAdapter(MainActivity.this, (ArrayList<Movie>) localMoviesList);
+            movieAdapter.setItemSelectedListener(MainActivity.this);
+            recyclerView.setAdapter(movieAdapter);
+        }
+        else {
+            network.getPopularMoviesList();
 
-                pagesAdapter = new PagesAdapter(MainActivity.this);
-                pagesAdapter.setPageSelectedListener(MainActivity.this);
-                pagesRecyclerView.setAdapter(pagesAdapter);
-            }
-        });
+            network.setListener(new Network.NetworkListener() {
+                @Override
+                public void onSuccess(ArrayList<?> movies) {
+                    try {
+                        localMoviesList = (ArrayList<Movie>) movies;
+                        movieAdapter = new MovieAdapter(MainActivity.this, (ArrayList<Movie>) movies);
+                        movieAdapter.setItemSelectedListener(MainActivity.this);
+                        recyclerView.setAdapter(movieAdapter);
+
+                        pagesAdapter = new PagesAdapter(MainActivity.this);
+                        pagesAdapter.setPageSelectedListener(MainActivity.this);
+                        pagesRecyclerView.setAdapter(pagesAdapter);
+                    }
+                    catch (Exception e){
+                        e.printStackTrace();
+                    }
+                }
+            });
+        }
 
 
 
@@ -123,7 +156,7 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.Item
 
     @Override
     public void onItemClicked(Movie movie) {
-        Intent i = new Intent(MainActivity.this,DetailActivity.class);
+        Intent i = new Intent(MainActivity.this, DetailActivity.class);
         i.putExtra("movie",movie);
         startActivity(i);
     }

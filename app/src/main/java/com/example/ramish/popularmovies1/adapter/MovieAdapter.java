@@ -1,4 +1,4 @@
-package com.example.ramish.popularmovies1;
+package com.example.ramish.popularmovies1.adapter;
 
 import android.content.Context;
 import android.view.LayoutInflater;
@@ -8,7 +8,9 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.bumptech.glide.Glide;
+import com.example.ramish.popularmovies1.GlideApp;
+import com.example.ramish.popularmovies1.model.Movie;
+import com.example.ramish.popularmovies1.R;
 
 import java.net.MalformedURLException;
 import java.net.URL;

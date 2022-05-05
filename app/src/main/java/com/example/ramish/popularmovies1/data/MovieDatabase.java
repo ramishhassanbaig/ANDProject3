@@ -2,7 +2,7 @@ package com.example.ramish.popularmovies1.data;
 
 import android.content.Context;
 
-import com.example.ramish.popularmovies1.Movie;
+import com.example.ramish.popularmovies1.model.Movie;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
